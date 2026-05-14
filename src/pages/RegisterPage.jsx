@@ -1,11 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, ShieldCheck, CheckCircle2 } from 'lucide-react'
+import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2 } from 'lucide-react'
 
 export function RegisterPage({ onNavigate }) {
     const [fullName, setFullName] = useState('')
@@ -22,70 +17,112 @@ export function RegisterPage({ onNavigate }) {
         if (password !== confirmPassword) { setError('Passwords do not match.'); return }
         if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
         setLoading(true)
-        const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } })
-        if (error) { setError(error.message); setLoading(false) } else { setSuccess(true); setLoading(false) }
+        const { error } = await supabase.auth.signUp({
+            email, password,
+            options: { data: { full_name: fullName } }
+        })
+        if (error) { setError(error.message); setLoading(false) }
+        else { setSuccess(true); setLoading(false) }
     }
 
-    if (success) return (
-        <div className="min-h-screen flex items-center justify-center bg-background px-4">
-            <div className="w-full max-w-sm space-y-6 text-center">
-                <div className="flex justify-center"><CheckCircle2 className="w-12 h-12 text-primary" /></div>
-                <div className="space-y-2">
-                    <h2 className="text-2xl font-bold">Check your email</h2>
-                    <p className="text-muted-foreground text-sm">We sent a confirmation link to <strong>{email}</strong>.</p>
-                </div>
-                <Button variant="outline" className="w-full" onClick={() => onNavigate?.('login')}>Back to sign in</Button>
-            </div>
-        </div>
-    )
-
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background px-4">
-            <div className="w-full max-w-sm space-y-6">
-                <div className="flex flex-col items-center gap-2 text-center">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary text-primary-foreground">
-                        <ShieldCheck className="w-6 h-6" />
-                    </div>
-                    <h1 className="text-2xl font-bold tracking-tight">SafeBuddy</h1>
-                    <p className="text-sm text-muted-foreground">Create your admin account</p>
+        <div style={{ minHeight: '100vh', display: 'flex', fontFamily: 'inherit' }}>
+            {/* Left side */}
+            <div style={{
+                flex: 1, background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                padding: 48, color: 'white'
+            }}>
+                <div style={{ width: 72, height: 72, background: 'rgba(255,255,255,0.2)', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                    <ShieldCheck size={40} color="white" />
                 </div>
-                <Card>
-                    <CardHeader className="pb-4">
-                        <CardTitle className="text-lg">Create account</CardTitle>
-                        <CardDescription>Fill in your details to get started</CardDescription>
-                    </CardHeader>
-                    <form onSubmit={handleRegister}>
-                        <CardContent className="space-y-4">
-                            {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
-                            <div className="space-y-2">
-                                <Label htmlFor="fullName">Full name</Label>
-                                <Input id="fullName" type="text" placeholder="Jane Smith" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
-                                <Input id="password" type="password" placeholder="Min. 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm password</Label>
-                                <Input id="confirmPassword" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-                            </div>
-                        </CardContent>
-                        <CardFooter className="flex flex-col gap-3 pt-2">
-                            <Button type="submit" className="w-full" disabled={loading}>
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {loading ? 'Creating account…' : 'Create account'}
-                            </Button>
-                            <p className="text-sm text-muted-foreground text-center">
-                                Already have an account?{' '}
-                                <button type="button" className="font-medium text-foreground hover:underline underline-offset-4" onClick={() => onNavigate?.('login')}>Sign in</button>
+                <h1 style={{ fontSize: 36, fontWeight: 800, margin: 0, textAlign: 'center' }}>SafeBuddy</h1>
+                <p style={{ fontSize: 16, opacity: 0.8, marginTop: 12, textAlign: 'center', maxWidth: 280 }}>
+                    Join the SafeBuddy admin team and keep users safe.
+                </p>
+                <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {['Manage user accounts', 'Monitor emergency alerts', 'View analytics & insights'].map((f, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>✓</div>
+                            <span style={{ fontSize: 14, opacity: 0.9 }}>{f}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Right side */}
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8faff', padding: 48 }}>
+                <div style={{ width: '100%', maxWidth: 380 }}>
+                    {success ? (
+                        <div style={{ textAlign: 'center' }}>
+                            <CheckCircle2 size={56} color="#22c55e" style={{ marginBottom: 16 }} />
+                            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#1f2937' }}>Check your email!</h2>
+                            <p style={{ color: '#9ca3af', fontSize: 14, marginTop: 8 }}>
+                                We sent a confirmation link to <strong>{email}</strong>. Open it to activate your account.
                             </p>
-                        </CardFooter>
-                    </form>
-                </Card>
+                            <button
+                                onClick={() => onNavigate('login')}
+                                style={{ marginTop: 24, padding: '12px 32px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                Back to Sign in
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <h2 style={{ fontSize: 26, fontWeight: 800, color: '#1f2937', margin: '0 0 4px' }}>Create account</h2>
+                            <p style={{ color: '#9ca3af', fontSize: 14, marginBottom: 32 }}>Fill in your details to get started</p>
+
+                            {error && (
+                                <div style={{ background: '#fef2f2', color: '#dc2626', padding: '10px 14px', borderRadius: 8, fontSize: 13, marginBottom: 20 }}>
+                                    {error}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                {[
+                                    { label: 'Full Name', type: 'text', value: fullName, onChange: e => setFullName(e.target.value), placeholder: 'Jane Smith', icon: User },
+                                    { label: 'Email', type: 'email', value: email, onChange: e => setEmail(e.target.value), placeholder: 'you@example.com', icon: Mail },
+                                    { label: 'Password', type: 'password', value: password, onChange: e => setPassword(e.target.value), placeholder: 'Min. 6 characters', icon: Lock },
+                                    { label: 'Confirm Password', type: 'password', value: confirmPassword, onChange: e => setConfirmPassword(e.target.value), placeholder: '••••••••', icon: Lock },
+                                ].map(({ label, type, value, onChange, placeholder, icon: Icon }) => (
+                                    <div key={label}>
+                                        <label style={{ fontSize: 12, fontWeight: 600, color: '#6b7280', display: 'block', marginBottom: 6 }}>{label}</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <Icon size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                                            <input
+                                                type={type} value={value} onChange={onChange}
+                                                placeholder={placeholder} required
+                                                style={{ width: '100%', padding: '11px 14px 11px 36px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <button
+                                    type="submit" disabled={loading}
+                                    style={{
+                                        width: '100%', padding: '12px', borderRadius: 10, border: 'none',
+                                        background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
+                                        color: 'white', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                        marginTop: 8, opacity: loading ? 0.7 : 1
+                                    }}
+                                >
+                                    {loading && <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite' }} />}
+                                    {loading ? 'Creating account…' : 'Create account'}
+                                </button>
+                                <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+                            </form>
+
+                            <p style={{ textAlign: 'center', fontSize: 13, color: '#9ca3af', marginTop: 24 }}>
+                                Already have an account?{' '}
+                                <button onClick={() => onNavigate('login')} style={{ background: 'none', border: 'none', color: '#ec4899', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>
+                                    Sign in
+                                </button>
+                            </p>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     )

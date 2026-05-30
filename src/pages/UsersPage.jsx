@@ -62,7 +62,7 @@ export function UsersPage() {
     useEffect(() => {
         supabase
             .from('profiles')
-            .select('*, accounts(email)')
+            .select('*')
             .order('updated_at', { ascending: false })
             .then(({ data, error }) => {
                 if (error) console.error(error)
@@ -92,10 +92,9 @@ export function UsersPage() {
                 u.id === user.id ? { ...u, is_active: newStatus } : u
             ))
 
-            const userEmail = user.accounts?.email ?? user.email
+            const userEmail = user.email
 
             if (!newStatus && userEmail) {
-                // Send reactivation email via Supabase built-in
                 const { error: emailError } = await supabase.auth.resetPasswordForEmail(userEmail, {
                     redirectTo: `${window.location.origin}/activate`,
                 })

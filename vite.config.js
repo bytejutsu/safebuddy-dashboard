@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig({
-  base: '/5safebuddy-dashboard/',   // ← added this
+  base: '/safebuddy-dashboard/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Search, Users, ShieldCheck, ShieldOff, Activity } from 'lucide-react'
 
 const palette = {
@@ -65,7 +62,7 @@ export function UsersPage() {
     useEffect(() => {
         supabase
             .from('profiles')
-            .select('*')
+            .select('*, accounts(email)')
             .order('updated_at', { ascending: false })
             .then(({ data, error }) => {
                 if (error) console.error(error)
@@ -82,6 +79,7 @@ export function UsersPage() {
     const handleToggle = async (user) => {
         setToggling(user.id)
         const newStatus = !user.is_active
+
         const { error } = await supabase
             .from('profiles')
             .update({ is_active: newStatus })
@@ -90,18 +88,22 @@ export function UsersPage() {
         if (error) {
             showToast('Failed to update account status', 'error')
         } else {
-            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u))
-            if (!newStatus && user.email) {
-                await fetch('https://hjkcyekgdpqkeijdntah.supabase.co/functions/v1/quick-handler', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: user.email,
-                        fullName: user.full_name ?? 'User',
-                        userId: user.id,
-                    }),
+            setUsers(prev => prev.map(u =>
+                u.id === user.id ? { ...u, is_active: newStatus } : u
+            ))
+
+            const userEmail = user.accounts?.email ?? user.email
+
+            if (!newStatus && userEmail) {
+                // Send reactivation email via Supabase built-in
+                const { error: emailError } = await supabase.auth.resetPasswordForEmail(userEmail, {
+                    redirectTo: `${window.location.origin}/activate`,
                 })
-                showToast(`Account deactivated. Email sent to ${user.email}`)
+                if (emailError) {
+                    showToast('Account deactivated but email failed to send', 'error')
+                } else {
+                    showToast(`Account deactivated. Reactivation email sent to ${userEmail}`)
+                }
             } else {
                 showToast('Account activated successfully')
             }
@@ -146,7 +148,6 @@ export function UsersPage() {
                 <p style={{ color: '#9ca3af', fontSize: 14, marginTop: 4 }}>Manage and monitor SafeBuddy user profiles</p>
             </div>
 
-            {/* KPI Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
                 <KpiCard title="Total Users" value={totalUsers} sub="registered accounts" icon={Users} color="purple" />
                 <KpiCard title="Phone Verified" value={verifiedUsers} sub={`${totalUsers > 0 ? Math.round(verifiedUsers/totalUsers*100) : 0}% of total`} icon={ShieldCheck} color="teal" />
@@ -154,9 +155,7 @@ export function UsersPage() {
                 <KpiCard title="Active This Week" value={updatedThisWeek} sub="recently updated" icon={ShieldOff} color="pink" />
             </div>
 
-            {/* Table Card */}
             <div style={{ background: 'white', borderRadius: 16, border: '1.5px solid #f3f4f6', overflow: 'hidden' }}>
-                {/* Header */}
                 <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <p style={{ fontSize: 15, fontWeight: 700, color: '#1f2937', margin: 0 }}>All Profiles</p>
                     <div style={{ position: 'relative' }}>
@@ -193,10 +192,10 @@ export function UsersPage() {
                         <tbody>
                             {filtered.map((u, i) => {
                                 const color = AVATAR_COLORS[i % AVATAR_COLORS.length]
-                                const c = palette[color]
                                 const isActive = u.is_active !== false
                                 return (
-                                    <tr key={u.id} style={{ borderTop: '1px solid #f3f4f6', opacity: isActive ? 1 : 0.6, transition: 'background 0.2s' }}
+                                    <tr key={u.id}
+                                        style={{ borderTop: '1px solid #f3f4f6', opacity: isActive ? 1 : 0.6, transition: 'background 0.2s' }}
                                         onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                     >

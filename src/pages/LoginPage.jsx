@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, ShieldCheck, Mail, Lock } from 'lucide-react'
 
 export function LoginPage({ onNavigate }) {
@@ -7,137 +11,131 @@ export function LoginPage({ onNavigate }) {
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
-    const [toast, setToast] = useState(null)
-
-    const showToast = (message) => {
-        setToast(message)
-        setTimeout(() => setToast(null), 5000)
-    }
 
     const handleLogin = async (e) => {
         e.preventDefault()
         setLoading(true)
         setError(null)
-
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) {
             setError(error.message)
             setLoading(false)
-            return
-        }
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_active')
-            .eq('id', data.user.id)
-            .single()
-
-        if (profile?.is_active === false) {
-            await supabase.auth.signOut()
-            setLoading(false)
-            showToast('Your account has been deactivated. Please check your email to reactivate it.')
-            return
         }
     }
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', fontFamily: 'inherit' }}>
-            {/* Left side */}
-            <div style={{
-                flex: 1, background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                padding: 48, color: 'white'
-            }}>
-                <div style={{ width: 72, height: 72, background: 'rgba(255,255,255,0.2)', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
-                    <ShieldCheck size={40} color="white" />
-                </div>
-                <h1 style={{ fontSize: 36, fontWeight: 800, margin: 0, textAlign: 'center' }}>SafeBuddy</h1>
-                <p style={{ fontSize: 16, opacity: 0.8, marginTop: 12, textAlign: 'center', maxWidth: 280 }}>
-                    Your trusted safety companion. Keep your loved ones safe.
-                </p>
-                <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {['Real-time emergency alerts', 'Trusted contacts network', 'Location sharing'].map((f, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>✓</div>
-                            <span style={{ fontSize: 14, opacity: 0.9 }}>{f}</span>
-                        </div>
-                    ))}
+        <div className="min-h-screen flex">
+            {/* Left Panel */}
+            <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-700 flex-col items-center justify-center p-12 text-white">
+                <div className="flex flex-col items-center gap-6 max-w-sm text-center">
+                    <div className="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center">
+                        <ShieldCheck className="w-10 h-10 text-white" />
+                    </div>
+                    <h1 className="text-4xl font-black tracking-tight">SafeBuddy</h1>
+                    <p className="text-white/80 text-lg">
+                        Welcome back to the SafeBuddy admin dashboard.
+                    </p>
+                    <ul className="mt-4 space-y-3 text-left w-full">
+                        {[
+                            'Manage user accounts',
+                            'Monitor emergency alerts',
+                            'View analytics & insights',
+                        ].map((item) => (
+                            <li key={item} className="flex items-center gap-3 text-white/90">
+                                <div className="w-5 h-5 rounded-full bg-white/30 flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                {item}
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             </div>
 
-            {/* Right side */}
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8faff', padding: 48 }}>
-                <div style={{ width: '100%', maxWidth: 380 }}>
-                    {toast && (
-                        <div style={{
-                            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-                            background: '#1f2937', color: 'white', padding: '14px 24px',
-                            borderRadius: 10, fontSize: 14, fontWeight: 500, zIndex: 9999,
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.25)', maxWidth: 420, textAlign: 'center',
-                            animation: 'fadeIn 0.3s ease'
-                        }}>
-                            {toast}
-                        </div>
-                    )}
-                    <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }`}</style>
-
-                    <h2 style={{ fontSize: 26, fontWeight: 800, color: '#1f2937', margin: '0 0 4px' }}>Welcome back</h2>
-                    <p style={{ color: '#9ca3af', fontSize: 14, marginBottom: 32 }}>Sign in to your admin dashboard</p>
+            {/* Right Panel */}
+            <div className="flex-1 flex items-center justify-center px-6 py-12 bg-background">
+                <div className="w-full max-w-md space-y-8">
+                    <div>
+                        <h2 className="text-3xl font-black tracking-tight text-foreground">
+                            Welcome Back
+                        </h2>
+                        <p className="mt-2 text-muted-foreground">
+                            Don't have an account?{' '}
+                            <button
+                                type="button"
+                                className="font-semibold text-blue-500 hover:text-blue-700 transition-colors"
+                                onClick={() => onNavigate?.('register')}
+                            >
+                                Sign up
+                            </button>
+                        </p>
+                    </div>
 
                     {error && (
-                        <div style={{ background: '#fef2f2', color: '#dc2626', padding: '10px 14px', borderRadius: 8, fontSize: 13, marginBottom: 20 }}>
-                            {error}
-                        </div>
+                        <Alert variant="destructive">
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
                     )}
 
-                    <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div>
-                            <label style={{ fontSize: 12, fontWeight: 600, color: '#6b7280', display: 'block', marginBottom: 6 }}>Email</label>
-                            <div style={{ position: 'relative' }}>
-                                <Mail size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                                <input
-                                    type="email" value={email} onChange={e => setEmail(e.target.value)}
-                                    placeholder="you@example.com" required
-                                    style={{ width: '100%', padding: '11px 14px 11px 36px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                    <form onSubmit={handleLogin} className="space-y-5">
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="text-blue-500 font-medium">Email</Label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400" />
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="your@email.com"
+                                    className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-12"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    autoComplete="email"
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <label style={{ fontSize: 12, fontWeight: 600, color: '#6b7280', display: 'block', marginBottom: 6 }}>Password</label>
-                            <div style={{ position: 'relative' }}>
-                                <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                                <input
-                                    type="password" value={password} onChange={e => setPassword(e.target.value)}
-                                    placeholder="••••••••" required
-                                    style={{ width: '100%', padding: '11px 14px 11px 36px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className="text-blue-500 font-medium">Password</Label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400" />
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="••••••••"
+                                    className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-12"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    autoComplete="current-password"
                                 />
+                            </div>
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    className="text-sm text-blue-500 hover:text-blue-700 transition-colors font-medium"
+                                    onClick={() => onNavigate?.('forgot-password')}
+                                >
+                                    Forgot password?
+                                </button>
                             </div>
                         </div>
 
-                        <button
-                            type="submit" disabled={loading}
-                            style={{
-                                width: '100%', padding: '12px', borderRadius: 10, border: 'none',
-                                background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
-                                color: 'white', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                                marginTop: 8, opacity: loading ? 0.7 : 1
-                            }}
+                        <Button
+                            type="submit"
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl h-12 text-base"
+                            disabled={loading}
                         >
-                            {loading && <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite' }} />}
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {loading ? 'Signing in…' : 'Sign in'}
-                        </button>
-                        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-                    </form>
+                        </Button>
 
-                    <p style={{ textAlign: 'center', fontSize: 13, color: '#9ca3af', marginTop: 24 }}>
-                        Don't have an account?{' '}
-                        <button onClick={() => onNavigate('register')} style={{ background: 'none', border: 'none', color: '#0ea5e9', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>
-                            Create one
-                        </button>
-                    </p>
+                        <p className="text-xs text-muted-foreground text-center">
+                            By signing in you agree to the terms and conditions.
+                        </p>
+                    </form>
                 </div>
             </div>
         </div>

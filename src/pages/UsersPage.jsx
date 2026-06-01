@@ -56,6 +56,7 @@ export function UsersPage() {
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
+    const [filter, setFilter] = useState('all')
     const [toggling, setToggling] = useState(null)
     const [toast, setToast] = useState(null)
 
@@ -112,12 +113,20 @@ export function UsersPage() {
 
     const filtered = users.filter((u) => {
         const q = search.toLowerCase()
-        if (!q) return true
-        return (
+        const matchesSearch = !q || (
             u.full_name?.toLowerCase().includes(q) ||
             u.phone?.toLowerCase().includes(q) ||
             u.id?.toLowerCase().includes(q)
         )
+        const matchesFilter =
+            filter === 'all'         ? true :
+            filter === 'active'      ? u.is_active !== false :
+            filter === 'deactivated' ? u.is_active === false :
+            filter === 'verified'    ? u.phone_verified :
+            filter === 'unverified'  ? !u.phone_verified :
+            true
+
+        return matchesSearch && matchesFilter
     })
 
     const totalUsers = users.length
@@ -157,18 +166,35 @@ export function UsersPage() {
             <div style={{ background: 'white', borderRadius: 16, border: '1.5px solid #f3f4f6', overflow: 'hidden' }}>
                 <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <p style={{ fontSize: 15, fontWeight: 700, color: '#1f2937', margin: 0 }}>All Profiles</p>
-                    <div style={{ position: 'relative' }}>
-                        <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                        <input
-                            placeholder="Search by name or phone..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <div style={{ position: 'relative' }}>
+                            <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                            <input
+                                placeholder="Search by name or phone..."
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                style={{
+                                    paddingLeft: 32, paddingRight: 16, paddingTop: 8, paddingBottom: 8,
+                                    border: '1.5px solid #e5e7eb', borderRadius: 10, fontSize: 13,
+                                    outline: 'none', width: 220, color: '#374151'
+                                }}
+                            />
+                        </div>
+                        <select
+                            value={filter}
+                            onChange={e => setFilter(e.target.value)}
                             style={{
-                                paddingLeft: 32, paddingRight: 16, paddingTop: 8, paddingBottom: 8,
-                                border: '1.5px solid #e5e7eb', borderRadius: 10, fontSize: 13,
-                                outline: 'none', width: 220, color: '#374151'
+                                padding: '8px 12px', border: '1.5px solid #e5e7eb',
+                                borderRadius: 10, fontSize: 13, color: '#374151',
+                                outline: 'none', cursor: 'pointer', background: 'white'
                             }}
-                        />
+                        >
+                            <option value="all">All users</option>
+                            <option value="active">Active only</option>
+                            <option value="deactivated">Deactivated only</option>
+                            <option value="verified">Phone verified</option>
+                            <option value="unverified">Unverified</option>
+                        </select>
                     </div>
                 </div>
 
@@ -177,7 +203,7 @@ export function UsersPage() {
                 ) : filtered.length === 0 ? (
                     <div style={{ padding: 60, textAlign: 'center' }}>
                         <p style={{ color: '#6b7280', fontWeight: 600 }}>No users found</p>
-                        <p style={{ color: '#9ca3af', fontSize: 13 }}>Try a different search term</p>
+                        <p style={{ color: '#9ca3af', fontSize: 13 }}>Try a different search term or filter</p>
                     </div>
                 ) : (
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -247,7 +273,7 @@ export function UsersPage() {
                     </table>
                 )}
 
-                {search && filtered.length > 0 && (
+                {(search || filter !== 'all') && filtered.length > 0 && (
                     <div style={{ padding: '12px 24px', borderTop: '1px solid #f3f4f6' }}>
                         <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>Showing {filtered.length} of {totalUsers} users</p>
                     </div>

@@ -7,6 +7,8 @@ import { AnalyticsPage } from './pages/AnalyticsPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ActivatePage } from './pages/ActivatePage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -15,6 +17,8 @@ export default function App() {
 
   const isActivatePage = window.location.pathname.includes('activate') ||
     window.location.search.includes('userId')
+
+  const isResetPage = window.location.pathname.includes('reset-password')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -33,6 +37,13 @@ export default function App() {
     }} />
   }
 
+  if (isResetPage) {
+    return <ResetPasswordPage onNavigate={(page) => {
+      window.history.pushState({}, '', '/')
+      setAuthPage(page)
+    }} />
+  }
+
   if (session === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -43,6 +54,7 @@ export default function App() {
 
   if (!session) {
     if (authPage === 'register') return <RegisterPage onNavigate={setAuthPage} />
+    if (authPage === 'forgot-password') return <ForgotPasswordPage onNavigate={setAuthPage} />
     return <LoginPage onNavigate={setAuthPage} />
   }
 

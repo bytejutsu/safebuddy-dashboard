@@ -4,11 +4,12 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, ShieldCheck, Mail, Lock } from 'lucide-react'
+import { Loader2, ShieldCheck, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 
 export function LoginPage({ onNavigate }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
@@ -103,14 +104,21 @@ export function LoginPage({ onNavigate }) {
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400" />
                                 <Input
                                     id="password"
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     placeholder="••••••••"
-                                    className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-12"
+                                    className="pl-10 pr-10 bg-slate-50 border-slate-200 rounded-xl h-12"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     autoComplete="current-password"
                                 />
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                    onClick={() => setShowPassword((v) => !v)}
+                                >
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
                             </div>
                             <div className="flex justify-end">
                                 <button
